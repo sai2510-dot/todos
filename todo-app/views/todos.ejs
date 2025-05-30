@@ -1,0 +1,24 @@
+<table border="1" cellpadding="5" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Due Date</th>
+      <th>Completed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (todos.length === 0) { %>
+      <tr>
+        <td colspan="3" style="text-align: center;">No todos available</td>
+      </tr>
+    <% } else { %>
+      <% todos.forEach(todo => { %>
+        <tr>
+          <td><%= todo.title %></td>
+          <td><%= todo.dueDate %></td>
+          <td><%= todo.completed ? '✔️' : '❌' %></td>
+        </tr>
+      <% }) %>
+    <% } %>
+  </tbody>
+</table>
