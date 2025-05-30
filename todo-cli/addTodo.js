@@ -1,3 +1,4 @@
+export function addTodo(){
 // addTodo.js
 const argv = require("minimist")(process.argv.slice(2));
 const db = require("./models/index");
@@ -29,3 +30,4 @@ const getJSDate = (days) => {
   await createTodo({ title, dueDate: getJSDate(parseInt(dueInDays)), completed: false });
   await db.Todo.showList();
 })();
+}
