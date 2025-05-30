@@ -1,4 +1,4 @@
-// completeTodo.js
+export function completeTodo(){// completeTodo.js
 var argv = require("minimist")(process.argv.slice(2));
 const db = require("./models/index");
 const markAsComplete = async (id) => {
@@ -20,3 +20,4 @@ const markAsComplete = async (id) => {
   await markAsComplete(id);
   await db.Todo.showList();
 })();
+}
