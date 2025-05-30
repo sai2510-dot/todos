@@ -4,9 +4,7 @@
   "description": "A simple todo CLI app",
   "main": "addTodo.js",
   "scripts": {
-"start": "node addTodo.js --title='Test task' --dueInDays=1"
-
-",
+"start": "node addTodo.js --title='Test task' --dueInDays=1",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "node --test"
