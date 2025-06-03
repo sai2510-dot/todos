@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Todo App</title>
+  <title>To-do Manager</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <%- include('header') %>
+  <% include header.ejs %>
 
-  <%- include('todos', { todos: todos }) %>
+  <form method="POST" action="/todos">
+    <input type="text" name="title" placeholder="Enter to-do title" required />
+    <button type="submit">Add</button>
+  </form>
 
-  <%- include('footer') %>
+  <% include todos.ejs %>
+
+  <% include footer.ejs %>
 </body>
 </html>
