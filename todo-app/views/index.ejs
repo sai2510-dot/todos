@@ -5,15 +5,17 @@
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <% include header.ejs %>
+  <%- include('header') %>
 
-  <form method="POST" action="/todos">
-    <input type="text" name="title" placeholder="Enter to-do title" required />
-    <button type="submit">Add</button>
-  </form>
+  <div class="container">
+    <form method="POST" action="/todos">
+      <input type="text" name="title" placeholder="Enter to-do title" required />
+      <button type="submit">Add</button>
+    </form>
 
-  <% include todos.ejs %>
+    <%- include('todos') %>
+  </div>
 
-  <% include footer.ejs %>
+  <%- include('footer') %>
 </body>
 </html>
