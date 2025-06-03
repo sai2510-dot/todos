@@ -1,32 +1,53 @@
 const express = require("express");
 const app = express();
 const path = require("path");
-const db = require("./models"); // import your Sequelize models
+const db = require("./models"); // Sequelize models
 
-app.use(express.json()); // To parse JSON request bodies
+app.use(express.json()); // Parse JSON request bodies
+app.use(express.urlencoded({ extended: true })); // Parse form submissions
 
-// Set EJS as templating engine
+// Set up EJS
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Serve static files
+// Serve static files from 'public'
 app.use(express.static(path.join(__dirname, "public")));
 
-// Route to fetch todos from DB and render index page
+// Homepage: render grouped todos
 app.get("/", async (req, res) => {
   try {
     const todos = await db.Todo.findAll({ order: [["dueDate", "ASC"]] });
-    res.render("index", { todos });
+    const today = new Date().toISOString().split("T")[0];
+
+    const overdue = todos.filter((todo) => todo.dueDate < today);
+    const dueToday = todos.filter((todo) => todo.dueDate === today);
+    const dueLater = todos.filter((todo) => todo.dueDate > today);
+
+    res.render("index", {
+      overdue,
+      dueToday,
+      dueLater,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
 });
 
-// API endpoint to create a new todo (POST /todos)
+// API: Get all todos
+app.get("/todos", async (req, res) => {
+  try {
+    const todos = await db.Todo.findAll({ order: [["dueDate", "ASC"]] });
+    res.json(todos);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Create a new todo
 app.post("/todos", async (req, res) => {
   try {
-    const { title, dueDate, completed } = req.body;
+    const { title, dueDate, completed = false } = req.body;
     const todo = await db.Todo.create({ title, dueDate, completed });
     res.status(201).json(todo);
   } catch (error) {
@@ -34,7 +55,7 @@ app.post("/todos", async (req, res) => {
   }
 });
 
-// API endpoint to mark a todo as completed (PUT /todos/:id/markASCompleted)
+// API: Mark as completed
 app.put("/todos/:id/markASCompleted", async (req, res) => {
   try {
     const todo = await db.Todo.findByPk(req.params.id);
@@ -49,23 +70,11 @@ app.put("/todos/:id/markASCompleted", async (req, res) => {
   }
 });
 
-// API endpoint to fetch all todos in JSON format (GET /todos)
-app.get("/todos", async (req, res) => {
-  try {
-    const todos = await db.Todo.findAll({ order: [["dueDate", "ASC"]] });
-    res.json(todos);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// API endpoint to delete a todo by ID (DELETE /todos/:id)
+// API: Delete todo
 app.delete("/todos/:id", async (req, res) => {
   try {
     const todo = await db.Todo.findByPk(req.params.id);
-    if (!todo) {
-      return res.json(false);
-    }
+    if (!todo) return res.json(false);
     await todo.destroy();
     res.json(true);
   } catch (error) {
@@ -73,25 +82,25 @@ app.delete("/todos/:id", async (req, res) => {
   }
 });
 
-// 🔧 Seed route for debugging (adds one test todo to DB)
+// Optional: seed route for testing
 app.get("/seed", async (req, res) => {
   try {
     await db.Todo.create({
-      title: "Test Task",
-      dueDate: "2025-06-01",
+      title: "Sample Task",
+      dueDate: new Date().toISOString().split("T")[0],
       completed: false,
     });
     res.redirect("/");
   } catch (error) {
-    console.error("Seeding error:", error);
-    res.status(500).send("Failed to seed todo");
+    console.error("Seed error:", error);
+    res.status(500).send("Seeding failed");
   }
 });
 
-// Sync database and start server
+// Sync DB and start server
 const PORT = process.env.PORT || 3000;
 db.sequelize.sync().then(() => {
   app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
   });
 });
