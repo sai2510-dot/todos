@@ -4,7 +4,7 @@
   "description": "Todo app using Express, Sequelize, and SQLite3",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start:prod":"node index.js",
     "dev": "nodemon index.js",
     "test": "jest",
     "prepare": "husky install"
