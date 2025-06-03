@@ -8,11 +8,13 @@
   <%- include('header') %>
 
   <div class="container">
+    <!-- Form to add new todo -->
     <form method="POST" action="/todos">
       <input type="text" name="title" placeholder="Enter to-do title" required />
       <button type="submit">Add</button>
     </form>
 
+    <!-- Include todos partial to list todos in 3 sections -->
     <%- include('todos') %>
   </div>
 
