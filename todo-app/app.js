@@ -1,31 +1,59 @@
 const express = require("express");
-const app = express();
+const path = require("path");
 const { Todo } = require("./models");
+
+const app = express();
 
 // Set up EJS as view engine
 app.set("view engine", "ejs");
 
-// Serve static files from 'public' folder (for CSS, JS, images)
-app.use(express.static("public"));
+// Serve static files (e.g., CSS)
+app.use(express.static(path.join(__dirname, "public")));
 
-// Parse URL-encoded bodies (for form submissions)
+// Body parsers
 app.use(express.urlencoded({ extended: false }));
-
-// Parse JSON bodies (for API requests)
 app.use(express.json());
 
-// Render index page with todos
+// Utility: get today's date in YYYY-MM-DD
+const getTodayDate = () => new Date().toISOString().split("T")[0];
+
+// Home route: renders UI
 app.get("/", async (req, res) => {
   try {
     const todos = await Todo.findAll();
-    res.render("index", { todos });
+    const today = getTodayDate();
+
+    const overdue = todos.filter((todo) => todo.dueDate < today);
+    const dueToday = todos.filter((todo) => todo.dueDate === today);
+    const dueLater = todos.filter((todo) => todo.dueDate > today);
+
+    res.render("index", {
+      overdue,
+      dueToday,
+      dueLater,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error loading todos");
   }
 });
 
-// --- API routes ---
+// Create new todo (HTML form)
+app.post("/todos", async (req, res) => {
+  try {
+    await Todo.create({
+      title: req.body.title,
+      dueDate: getTodayDate(),
+      completed: false,
+    });
+    res.redirect("/");
+  } catch (error) {
+    console.error(error);
+    res.status(422).send("Failed to create todo");
+  }
+});
+
+// --- API Endpoints (for Postman / automation) ---
 
 // Get all todos (JSON)
 app.get("/todos", async (_req, res) => {
@@ -53,10 +81,14 @@ app.get("/todos/:id", async (req, res) => {
   }
 });
 
-// Add new todo (from JSON body)
-app.post("/todos", async (req, res) => {
+// Add new todo (JSON)
+app.post("/api/todos", async (req, res) => {
   try {
-    const todo = await Todo.addTodo(req.body);
+    const todo = await Todo.create({
+      title: req.body.title,
+      dueDate: req.body.dueDate || getTodayDate(),
+      completed: false,
+    });
     res.status(201).json(todo);
   } catch (error) {
     console.error(error);
@@ -64,7 +96,7 @@ app.post("/todos", async (req, res) => {
   }
 });
 
-// Mark todo as completed
+// Mark as completed
 app.put("/todos/:id/markAsCompleted", async (req, res) => {
   try {
     const todo = await Todo.findByPk(req.params.id);
@@ -80,7 +112,7 @@ app.put("/todos/:id/markAsCompleted", async (req, res) => {
   }
 });
 
-// Delete todo by ID
+// Delete todo
 app.delete("/todos/:id", async (req, res) => {
   try {
     const todo = await Todo.findByPk(req.params.id);
