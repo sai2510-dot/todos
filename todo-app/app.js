@@ -43,7 +43,7 @@ app.post("/todos", async (req, res) => {
   try {
     await Todo.create({
       title: req.body.title,
-      dueDate: getTodayDate(),
+      dueDate: req.body.dueDate,  // <-- use dueDate from form
       completed: false,
     });
     res.redirect("/");
